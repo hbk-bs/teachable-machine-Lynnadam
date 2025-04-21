@@ -197,62 +197,83 @@
 
   <div id="successMessage"></div>
 
-  <script>
-    const URL = "https://teachablemachine.withgoogle.com/models/QUD-R0XNd/";
-    const letters = ["A", "B", "E", "L", "M", "N", "S", "U"];
-    const wordList = ["BAUM", "BESEN", "MAUS", "BUS", "MANN", "BLUME", "BALL", "LESEN"];
-    let targetWord = "";
-    let currentIndex = 0;
-    let recognizer;
-    const ball = document.getElementById("ball");
-    let usedWords = [];
-    let isProcessing = false;
+  <div id="symbolBox" class="symbol-box"></div>
 
-    function pickRandomWord() {
-      let word;
-      do {
-        word = wordList[Math.floor(Math.random() * wordList.length)];
-      } while (usedWords.includes(word));
-      usedWords.push(word);
-      if (usedWords.length === wordList.length) usedWords = [];
-      return word;
+<script>
+  const URL = "https://teachablemachine.withgoogle.com/models/QUD-R0XNd/";
+  const letters = ["A", "B", "E", "L", "M", "N", "S", "U"];
+  const wordList = ["BAUM", "BESEN", "MAUS", "BUS", "MANN", "BLUME", "BALL", "LESEN"];
+  let targetWord = "";
+  let currentIndex = 0;
+  let recognizer;
+  const ball = document.getElementById("ball");
+  let usedWords = [];
+  let isProcessing = false;
+
+  
+  const imageWords = {
+    BLUME: "https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/blume.png",
+    BESEN: "https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/besen.png",
+    MAUS: "https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/Maus.png",
+    BALL: "https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/ball.png",
+    BUS: "https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/bus.png",
+    BAUM: "https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/baum.png",
+    MANN: "https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/mann.png",
+    LESEN:"https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/lesen.png"
+  
+  };
+
+  function pickRandomWord() {
+    let word;
+    do {
+      word = wordList[Math.floor(Math.random() * wordList.length)];
+    } while (usedWords.includes(word));
+    usedWords.push(word);
+    if (usedWords.length === wordList.length) usedWords = [];
+    return word;
+  }
+
+  function setupWord(word) {
+    targetWord = word;
+    currentIndex = 0;
+    isProcessing = false;
+    document.getElementById("wordSlots").innerHTML = "";
+    document.getElementById("successMessage").innerText = "";
+    document.getElementById("next-button").style.display = "none";
+    document.getElementById("win-overlay").style.display = "none";
+    ball.style.top = "80px";
+    ball.style.left = "50%";
+    ball.style.transform = "translateX(-50%)";
+    ball.src = "https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/vorne.png";
+
+    for (let i = 0; i < word.length; i++) {
+      const slot = document.createElement("div");
+      slot.className = "word-slot";
+      slot.id = "slot-" + i;
+      slot.setAttribute("data-letter", word[i]);
+      slot.innerHTML = `<span style="visibility: hidden;">${word[i]}</span>`;
+      document.getElementById("wordSlots").appendChild(slot);
     }
 
-    function setupWord(word) {
-      targetWord = word;
-      currentIndex = 0;
-      isProcessing = false;
-      document.getElementById("wordSlots").innerHTML = "";
-      document.getElementById("successMessage").innerText = "";
-      document.getElementById("next-button").style.display = "none";
-      document.getElementById("win-overlay").style.display = "none";
-      ball.style.top = "80px";
-      ball.style.left = "50%";
-      ball.style.transform = "translateX(-50%)";
-      ball.src = "https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/vorne.png";
-
-      for (let i = 0; i < word.length; i++) {
-        const slot = document.createElement("div");
-        slot.className = "word-slot";
-        slot.id = "slot-" + i;
-        slot.setAttribute("data-letter", word[i]);
-        slot.innerHTML = `<span style="visibility: hidden;">${word[i]}</span>`;
-        document.getElementById("wordSlots").appendChild(slot);
-      }
-
-      document.getElementById("symbolBox").innerHTML = `<h2>${word}</h2>`;
+    
+    const symbolBox = document.getElementById("symbolBox");
+    if (imageWords[word]) {
+      symbolBox.innerHTML = `<img src="${imageWords[word]}" alt="${word}" style="max-height: 180px;">`;
+    } else {
+      symbolBox.innerHTML = `<h2>${word}</h2>`;
     }
+  }
 
-    async function createModel() {
-      recognizer = speechCommands.create(
-        "BROWSER_FFT",
-        undefined,
-        URL + "model.json",
-        URL + "metadata.json"
-      );
-      await recognizer.ensureModelLoaded();
-      return recognizer;
-    }
+  async function createModel() {
+    recognizer = speechCommands.create(
+      "BROWSER_FFT",
+      undefined,
+      URL + "model.json",
+      URL + "metadata.json"
+    );
+    await recognizer.ensureModelLoaded();
+    return recognizer;
+  }
 
     async function startGame() {
       document.getElementById("overlay").style.display = "none";
