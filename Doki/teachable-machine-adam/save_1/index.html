@@ -13,11 +13,17 @@
       padding: 0;
       overflow: hidden;
     }
+    body {
+  zoom: 0.4;           /* verkleinert die ganze Seite */
+  transform-origin: top left;
+}
 
     h1 {
       margin: 40px 0;
     }
-
+    #overlay {
+  font-size: 32px; /* oder was dir passt */
+}
     #overlay, #win-overlay {
       position: absolute;
       top: 0;
@@ -42,7 +48,7 @@
 
     #start-button, #next-button-overlay {
       padding: 15px 30px;
-      font-size: 18px;
+      font-size: 40px;
       border: none;
       background-color: #007BFF;
       color: white;
@@ -115,7 +121,11 @@
       margin-top: 30px;
     }
 
-   
+    .win-gif {
+      width: 300px;
+      height: auto;
+      margin: 20px 0;
+    }
   </style>
 </head>
 <body>
@@ -127,7 +137,7 @@
 
   <div id="win-overlay">
     <h2>Super!</h2>
-   
+    <img src="https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/gif.gif" alt="Feierndes Gif" class="win-gif" />
     <button id="next-button-overlay" onclick="nextWordFromOverlay()">Neues Wort</button>
   </div>
 
@@ -183,8 +193,8 @@
       document.getElementById("successMessage").innerText = "";
       document.getElementById("next-button").style.display = "none";
       document.getElementById("win-overlay").style.display = "none";
-      ball.style.top = "70px";
-      ball.style.left = "0px";
+      ball.style.top = "100px";
+      ball.style.left = "60px";
 
       for (let i = 0; i < word.length; i++) {
         const slot = document.createElement("div");

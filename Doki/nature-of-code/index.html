@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wolken-Darstellungen</title>
+  <style>
+    /* ========= Basics ========= */
+    :root{
+      --bg: #fafafa;
+      --fg: #2b2b2b;
+      --accent: #2a5298;
+      --shadow-sm: 0 4px 12px rgba(0,0,0,0.06);
+      --shadow-md: 0 6px 16px rgba(0,0,0,0.06);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+
+    .back-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-left: 3px solid white;   /* eleganter Strich links */
+  transition: all 0.3s ease;
+  opacity: 0.85;
+}
+
+.back-button:hover {
+  opacity: 1;
+  transform: translateX(-5px);   /* leichter Slide-Effekt nach links */
+}
+
+.intro-text { max-width: 1100px; /* gleiche Breite wie main */ margin: 0 auto 50px; padding: 5px 35px 2px; font-family: 'Lora', serif; font-size: 1.3rem;   line-height: 1.8; color: #444; margin-top: -2px; /* dezenter Rahmen um den ganzen Text */ border: 2px solid var(--accent); /* leichter Hintergrund für Eleganz */ } .intro-text-inner { transform: translateY(-15px); /* Wert anpassen */ } .task-label { display: inline-block; font-family: 'Playfair Display', serif; /* gleiche elegante Schrift wie h1/h2 */ font-size: 8rem; /* größer als normaler Text */ font-weight: 700; color: var(--accent); line-height: 1; /* verhindert, dass es viel Platz nach unten zieht */ margin-right: 10px; /* Abstand zum restlichen Text */ transform: translate(-40px, -10px); letter-spacing: 1px; opacity: 0.95; margin-bottom: -40px; /* leicht nach oben verschoben */ }
+
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.7;
+    }
+
+    /* ========= Header ========= */
+    header {
+      background: linear-gradient(120deg, #1e3c72, #2a5298);
+      color: white;
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      margin: 0 0 10px;
+    }
+
+    header p {
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: #e0e4f5;
+      margin: 0;
+    }
+
+    /* ========= Main ========= */
+    main {
+      max-width: 1100px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+
+    /* ========= Sections ========= */
+    section {
+      background: white;
+      border-radius: 14px;
+      padding: 40px;
+      margin-bottom: 40px;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.3s ease;
+    }
+
+    section:hover {
+      transform: scale(1.01);
+    }
+
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: #1a1a1a;
+      text-align: center;
+    }
+
+    p {
+      font-size: 1.05rem;
+      margin: 15px 0;
+      color: #555;
+      
+    }
+
+    h3 {
+      position: relative;
+      font-size: 1.3rem;
+      margin-top: 30px;
+      font-weight: 600;
+      color: var(--accent);
+      padding-left: 12px;
+    }
+
+    h3::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.2em;
+      width: 2px;
+      height: 1.2em;
+      background: var(--accent);
+    }
+
+    /* ========= Iframe ========= */
+    .iframe-container {
+      position: relative;
+      padding-top: 56.25%;
+      overflow: hidden;
+      border-radius: 12px;
+      margin-top: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .iframe-container iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: none;
+      border-radius: 12px;
+    }
+
+    /* ========= Links ========= */
+    .text-link {
+      display: inline-block;
+      margin-top: 15px;
+      color: var(--accent);
+      font-weight: 600;
+      text-decoration: none;
+      position: relative;
+      font-size: 1.5rem;
+    }
+
+    .text-link::after {
+      content: "";
+      position: absolute;
+      width: 0%;
+      height: 2px;
+      bottom: -2px;
+      left: 0;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+
+    .text-link:hover::after {
+      width: 100%;
+    }
+
+    .arrow-link::after {
+  display: none; /* keine Unterstreichung */
+}
+
+.arrow-link {
+  font-size: 1.5rem;
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.arrow-link:hover {
+  transform: scale(1.3); /* wird beim Hover größer */
+}
+
+    /* ========= Galerie ========= */
+    .image-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    
+
+      border: 2px solid #2a5298;   /* blauer Rand */
+      /* abgerundete Ecken */
+  padding: 20px 10px;               /* Abstand der Bilder zum Rand */
+  
+    }
+
+    .image-gallery img {
+      max-width: 140px;
+      border-radius: 10px;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .image-gallery img:hover {
+      transform: scale(1.05);
+      box-shadow: var(--shadow-md);
+    }
+    .dev-container .image-gallery {
+  flex: 1;   
+  display: flex;
+  flex-direction: row; /* Bilder nebeneinander */
+  gap: 20px;           /* Abstand zwischen den Bildern */
+}
+
+    .dev-container {
+  display: flex;
+  align-items: flex-start;   /* Text und Bilder oben ausrichten */
+  gap: 30px;                 /* Abstand zwischen Text und Bildern */
+}
+
+.dev-container p {
+  flex: 2;   /* Text nimmt 2 Teile des Platzes */
+}
+
+.triangle-link {
+  color: var(--accent);
+  font-weight: bold;
+  font-size: 2rem;   /* gleiche Größe wie h2 */
+  text-decoration: none;
+  display: inline-block;
+  margin-right: 10px; /* etwas Abstand zum Text */
+  transition: transform 0.3s ease;
+}
+
+.triangle-link::after {
+  display: none; /* keine Unterstreichung */
+}
+
+.triangle-link:hover {
+  transform: scale(1.3); /* beim Hover größer */
+}
+
+
+
+    /* ========= Responsive ========= */
+    @media (max-width: 900px) {
+      header h1 { font-size: 2rem; }
+      .iframe-container { padding-top: 70%; }
+    }
+
+    .dev-container .image-gallery img,
+  .image-gallery img {
+    max-width: 100px;   /* feste maximale Breite */
+    height: auto;       /* Höhe automatisch */
+  }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1><a href="../index.html#projects" class="back-button">← Back</a>
+      Nature of Code</h1>
+    <p></p>
+  </header>
+  
+  <main>
+
+    <div class="intro-text">
+      <div class="intro-text-inner">
+        <span class="task-label">Task</span>
+       <p> Observe natural patterns and then translate them into code. 
+         </p>
+    </div>
+  </div>
+  <section>
+    
+  
+    <h3>Briefing</h3>
+
+    <p> 
+      This was the task during the excursion to the island Amrum, which unfortunately I could not attend. It was about recognizing natural patterns, systems, and behaviors in the environment, for example natural phenomena, animals, or plants. Afterwards, these observations should be translated into code, for example through taken photos or sketches. The goal was not a realistic representation in code but rather a reproduction of the recognized logic behind the patterns.
+    </p>
+
+   <p> 
+
+      </p>
+    <h3>Development</h3>
+
+   
+    <div class="dev-container">
+      <p> 
+        After my exciting one-man excursion through Braunschweig, I decided to deal 
+        with clouds and their patterns. I took a few photos and then first occupied 
+        myself with the different types of clouds, of which there were more than I 
+        thought. I then sketched these very simply in js.
+      </p>
+    
+      <div class="image-gallery">
+        <img src="https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/IMG_6852.jpg" alt="Wolkenbild 1">
+        <img src="https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/IMG_6857.jpg" alt="Wolkenbild 2">
+      </div>
+    </div>
+
+   
+</section>
+
+    <section id="cumulus">
+      <h2>Cumulus Clouds</h2>
+      <p>Cumulus clouds are the classic white, fluffy clouds that are often associated with beautiful, sunny days.
+
+      </p>
+      <div class="iframe-container">
+        <iframe src="cumulus-wolken/index.html" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section id="stratus">
+      <h2>Stratus Clouds</h2>
+      <p>Stratus clouds are flat, gray clouds that often cover the sky with a uniform layer and frequently bring drizzle.
+
+      </p>
+      <div class="iframe-container">
+        <iframe src="stratus-wolken/index.html" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section id="cirrus">
+      <h2>Cirrus Clouds</h2>
+      <p>Cirrus clouds are thin, feathery clouds that appear at high altitudes and in fair weather.</p>
+      <div class="iframe-container">
+        <iframe src="cirrus-wolken/index.html" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section id="altocumulus">
+      <h2>Altocumulus Clouds</h2>
+      <p>Altocumulus clouds are white to gray, layered clouds that appear at mid-level altitudes in the sky.</p>
+      <div class="iframe-container">
+        <iframe src="altocumulus-wolken/index.html" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section id="nimbostratus">
+      <h2>Nimbostratus Clouds</h2>
+      <p>Nimbostratus clouds are dense, dark clouds that are often associated with rain or snowfall and completely cover the sky.</p>
+      <div class="iframe-container">
+        <iframe src="nimbostratus-wolken/index.html" loading="lazy"></iframe>
+      </div>
+    </section>
+
+    <section>
+    
+  
+      <p> After I finished this visual representation of the different types of clouds, I thought about how I could use the type of movement patterns for my project. During my observations, I found it most fascinating how the clouds moved across the sky and overlapped each other, or how the sky could be covered by clouds drifting through. The most logical idea for me was to use the clouds as a kind of brush, imitating the movement of clouds drifting across the sky and slowly covering it.
+      </p>
+  
+      <p> Since during my research I also observed clouds at different times of the day, I also found it exciting to include this aspect, and I integrated the changing colors of the sky and the clouds as an option on the website. My goal was to enable the most exciting patterns possible with the movement of the clouds.
+      </p>
+  
+     
+  </section>
+
+    <section id="cumulus-inter">
+
+      
+      <h2>
+        <a href="cumulus-inter/index.html" target="_blank" class="triangle-link">▶</a>
+        Translation
+      </h2>
+      <div class="iframe-container">
+        <iframe src="cumulus-inter/index.html" loading="lazy"></iframe>
+      </div>
+
+    </section>
+
+    <section id="reflektion">
+      <h2>Reflection</h2>
+      <p>
+        No project in this semester has caused me as many headaches as this one. Maybe it was due to the fact that I did not participate in the excursion and therefore felt a certain insecurity in the implementation process.
+      </p>
+      
+      <p>
+        It was a big challenge for me to find a good balance between abstraction and recognizability. In the end, my idea could not be realized in the way I had originally planned.
+      </p>
+
+      <p>
+        For a theoretical further development, I could imagine, for example, also using the other cloud forms as painting tools.
+      </p>
+
+      <p>
+        But overall, the project showed me how one can use observations of one’s environment for design in programming, and thus coding can be not only a purely technical but also a very creative tool for interpretation.
+      </p>
+    
+    </section>
+  </main>
+
+</body>
+</html>

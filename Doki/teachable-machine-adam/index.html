@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Graphic Novel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+
+  
+
+<body>
+
+  <header>
+    <a href="../index.html#projects" class="back-button">← Back</a>
+    
+    <h1>Teachable Machine</h1>
+  
+  
+  
+
+  </header>
+
+  <main>
+
+    <div class="intro-text">
+      <div class="intro-text-inner">
+        <span class="task-label">Task</span>
+       <p> Create an interactive website powered by Google’s Teachable Machine, trained on your own data (pose, sound, image). </p>
+    </div>
+  </div>
+
+    <section>
+    
+  
+      
+      <h3>Briefing</h3>
+      
+    
+      <p> In the context of this project, we learned how to build websites with the help of Google’s <a href="../handouts/index.html#teachable" target="_blank" class="text-link">Teachable Machine</a>. Each of us trained our own models by feeding the AI with either photos, audio, or poses. In the beginning, it was mainly about experimenting with what is possible and how the models can eventually be used. We were supposed to become as creative as possible in our applications and not just let the AI classify things, but rather ask ourselves: how can I integrate these results into my website? </p>
+    
+      <h3>Concept</h3>
+
+      <p> I found the audio model the most interesting. Honestly, after trying things out for a bit, I thought that the image function would be the least likely to work without errors, and that it was quite uncomfortable to twist myself around in the classroom for the pose model. In addition, I immediately had an idea of how I could implement the audio model. My plan was to design an educational website for children, where they could learn to spell by loudly pronouncing the individual letters to form words.</p>
+      <p> This would be a way to get into spelling solely through the sound of words, for children who cannot yet write.</p>
+
+      <h3>Development</h3>
+      <p> So I enthusiastically started recording the alphabet for my model. However, it quickly became clear that it needed relatively many audio samples before it even worked to some extent. Therefore, I decided to simply choose a few words that shared the same letters and reduce the whole thing to eight letters. In this way, I also saw a better chance that the letters would be recognized with fewer errors, since the AI only had to distinguish a smaller number of letters.</p>
+      <p>My first draft was kept rather simple. The AI recognizes, if everything works correctly, the spoken letters, and when they match the target word, a ball moves and “brings the word” to its word slot. Once the target word is fully pronounced, the recognition stops and an overlay shows success.</p>
+      <iframe src="save_1/index.html" class="iframe-small" loading="lazy"></iframe>
+      <p>In this first version, of course, there were still some difficulties and problems to overcome. One was the design, which I was not yet satisfied with; so far, one only had to spell out the already written words, which naturally did not correspond to the concept of the learning function.</p>
+
+      <p>The very next step was therefore to draw and insert pictures that corresponded to the target word. In addition, I also wanted to make the page a bit more child-friendly: with the layout, with the colors, and by integrating a kind of mascot.</p>
+      
+      <p>But the technical part also did not yet work flawlessly. The biggest problem, apart from the fact that the words were not recognized well enough, was that letters were often inserted twice when the AI recognized the same letter multiple times. I solved this problem by implementing a timer that prevents new recognitions from being processed immediately; this lock is lifted again after three seconds.</p>
+       <pre><code>
+        if (currentIndex === targetWord.length) {
+          recognizer.stopListening();
+          showWinOverlay();
+        } else {
+          setTimeout(() => {
+            isProcessing = false;
+          }, 3000);   //
+        } </code></pre>
+      
+      <p> </p>
+     
+</section>
+
+
+
+<section>
+  <h2 class="final-heading">
+    <a href="teachable-machine/index Kopie.html" target="_blank" class="triangle-link" title="Zur finalen Version">▶</a>
+    Final Game
+  </h2>
+  <iframe src="teachable-machine/index Kopie.html" class="iframe" loading="lazy"></iframe>
+
+  
+ 
+</section>
+
+<section>
+  <h2>Reflection</h2>
+
+  <p>In the end, the whole website did not really match my taste. I probably overdid it with the child-friendly design and created something really cheesy, which personally hurts my eyes, but I think did serve my goal.</p>
+
+  <p>Overall, the topic was super exciting, and I found it fascinating to actually train an AI and be able to work with the results. Even though I could of course improve my website on many levels (for example by adding more words and letters), the technical possibilities of this AI were limited. I believe that even if I fed the AI with three times as many audio samples, the error rate would still remain quite high.</p>
+
+  <p>But I learned a lot about programming in this project and was able to recognize errors and possible solutions more and more quickly.</p>
+
+ 
+</section>
