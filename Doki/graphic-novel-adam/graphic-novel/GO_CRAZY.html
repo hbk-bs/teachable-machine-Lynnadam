@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Comic mit Cover</title>
+  <link rel="stylesheet" href="GO_CRAZY.css" />
+</head>
+<body>
+  <div class="comic-container cover-mode" id="comicContainer">
+    <!-- Cover -->
+    <div class="page single" id="coverPage">
+      <div class="cover-content" id="coverContent" onclick="startComic()">
+        <div class="pulse-ring"></div>
+        <img id="coverImage" src="" alt="Cover" />
+      </div>
+    </div>
+    <!-- Comic-Inhalt -->
+    <div class="comic-book" id="comicBook" style="display: none;">
+      <div class="page left" id="leftPage">
+        <div class="page-content">
+          <div class="content-area" id="leftContent"></div>
+          <div class="page-number left" id="leftPageNum">1</div>
+        </div>
+      </div>
+      <div class="page right" id="rightPage">
+        <div class="page-content">
+          <div class="content-area" id="rightContent"></div>
+          <div class="page-number right" id="rightPageNum">2</div>
+        </div>
+      </div>
+      <div class="navigation">
+        <button class="nav-button" id="prevBtn" onclick="previousPage()">← Zurück</button>
+        <button class="nav-button" id="nextBtn" onclick="nextPage()">Weiter →</button>
+      </div>
+      <div class="page-indicator left" id="leftIndicator">Bild</div>
+      <div class="page-indicator right" id="rightIndicator">Bild</div>
+    </div>
+  </div>
+  <script src="GO_CRAZY.js"></script>
+
+  <div id="backlink">
+		<style>
+			#backlink {
+				--color-accent: hsl(198, 100%, 50%);
+				position: absolute;
+				top: 8px;
+				right: 8px;
+				border: 1px dashed black;
+				background-color: white;
+				padding: 8px;
+				cursor: pointer;
+				color: black;
+				font-size: 0.8rem;
+				font-weight: bold;
+				transition: all 0.3s ease;
+				transform: rotate(-2deg) scale(0.9);
+				box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+				a {
+					text-decoration: none;
+					color: black;
+					color: inherit;
+					text-decoration: underline;
+					background-image: linear-gradient(to right,
+							var(--color-accent) 0%,
+							var(--color-accent) 100%);
+					background-size: 0% 100%;
+					background-position: left center;
+					background-repeat: no-repeat;
+					transition: background-size 0.2s ease-in-out;
+					padding: 0.5rem;
+				}
+				a:hover {
+					background-size: 100% 100%;
+					color: white;
+				}
+
+			}
+			#backlink:hover {
+				transform: rotate(2deg) scale(1);
+			}
+		</style>
+		<a href="https://rundgang2025.qawsed.site">Rundgang 2025</a>
+	</div>
+  
+</body>
+</html>

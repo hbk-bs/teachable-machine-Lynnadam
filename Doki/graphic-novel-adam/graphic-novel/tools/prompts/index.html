@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Image Prompts | inpyjamas.dev</title>
+	<meta name="description" content="A minimal web app for generating, editing, and saving image prompts.">
+	<meta name="author" content="ff6347">
+	<meta name="keywords" content="image prompts, prompt builder, image prompt generator, image prompt editor, image prompt saver">
+	<meta name="robots" content="index, follow">
+	<meta name="googlebot" content="index, follow">
+	<meta name="google" content="notranslate">
+	<link rel="shortcut icon" href="favicon.svg" type="image/svg+xml">
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<main>
+
+		<div class="container">
+			<h1>Prompt Builder</h1>
+			<form id="prompt-form" autocomplete="off">
+				<div class="prompt-table">
+					<div class="row">
+						<label for="subject"><b>Subject</b></label>
+						<textarea id="subject" name="subject" rows="2" required placeholder="a red cat in a red tuxedo and bow tie against a backdrop of futuristic highly detailed cityscape and traditional Japanese architecture"></textarea>
+					</div>
+					<div class="row">
+						<label for="category"><b>Category</b></label>
+						<input id="category" name="category" type="text" required placeholder="ukiyo-e, cyberpunk:2, neon noir illustration, digital art, vector art:2," />
+					</div>
+					<div class="row">
+						<label for="quality"><b>Quality Modifiers</b></label>
+						<input id="quality" name="quality" type="text" required placeholder="vibrant award-winning art, art showcase, portfolio, futuristic" />
+					</div>
+					<div class="row">
+						<label for="aesthetics"><b>Aesthetics & Composition</b></label>
+						<input id="aesthetics" name="aesthetics" type="text" required placeholder="highly detailed background" />
+					</div>
+					<div class="row">
+						<label for="negative"><b>Negative Elements</b></label>
+						<input id="negative" name="negative" type="text" required placeholder="dull, monochrome" />
+					</div>
+				</div>
+			</form>
+			<section class="output-section">
+				<label for="output"><b>Combined Prompt</b></label>
+				<textarea id="output" rows="6" readonly></textarea>
+				<div class="button-row">
+					<button type="button" id="save-prompt">Save</button>
+					<button type="button" id="clear-fields">Clear</button>
+				</div>
+			</section>
+			<section id="saved-prompts-section">
+				<h3 id="saved-prompts-title">Saved Prompts</h3>
+				<ul id="saved-prompts-list"></ul>
+			</section>
+		</div>
+	</main>
+	<footer>
+		<p>
+			Prompt Builder built with ❤︎ by <a href="https://github.com/ff6347">ff6347</a>  source code on <a href="https://github.com/ff6347/image-prompts.inpyjamas.dev">GitHub</a>
+		</p>
+	</footer>
+  <script src="index.js"></script>
+</body>
+</html>
