@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sprachgesteuerte Buchstabenanzeige</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    h1 {
+      margin-bottom: 40px;
+    }
+
+    #start-button {
+      padding: 15px 30px;
+      font-size: 18px;
+      border: none;
+      background-color: #007BFF;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #start-button:hover {
+      background-color: #0056b3;
+    }
+
+    .centered {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 50px;
+    }
+
+    .letters-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 50px;
+      position: relative;
+    }
+
+    .letter-box {
+      width: 60px;
+      height: 60px;
+      border: 2px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .ball {
+      width: 20px;
+      height: 20px;
+      background-color: red;
+      border-radius: 50%;
+      position: absolute;
+      top: 70px; /* unterhalb der Buchstaben */
+      left: 20px;
+      transition: left 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Teachable Machine Audio Model</h1>
+
+  <div class="centered">
+    <button id="start-button" onclick="init()">Start</button>
+  </div>
+
+  <div class="letters-container" id="letters">
+    <div class="letter-box" id="A">A</div>
+    <div class="letter-box" id="B">B</div>
+    <div class="letter-box" id="E">E</div>
+    <div class="letter-box" id="L">L</div>
+    <div class="letter-box" id="M">M</div>
+    <div class="letter-box" id="N">N</div>
+    <div class="letter-box" id="S">S</div>
+    <div class="letter-box" id="U">U</div>
+    <div class="ball" id="ball"></div>
+  </div>
+
+  <div id="label-container"></div>
+
+  <script>
+    const URL = "https://teachablemachine.withgoogle.com/models/QUD-R0XNd/";
+    const letters = ["A", "B", "E", "L", "M", "N", "S", "U"];
+
+    async function createModel() {
+      const recognizer = speechCommands.create(
+        "BROWSER_FFT",
+        undefined,
+        URL + "model.json",
+        URL + "metadata.json"
+      );
+      await recognizer.ensureModelLoaded();
+      return recognizer;
+    }
+
+    async function init() {
+      document.getElementById("start-button").style.display = "none"; // Verstecke den Button
+
+      const recognizer = await createModel();
+      const classLabels = recognizer.wordLabels();
+
+      recognizer.listen(result => {
+        const scores = result.scores;
+        const maxIndex = scores.indexOf(Math.max(...scores));
+        const detectedLabel = classLabels[maxIndex];
+
+        moveBall(detectedLabel);
+      }, {
+        probabilityThreshold: 0.75,
+        overlapFactor: 0.5,
+        invokeCallbackOnNoiseAndUnknown: false
+      });
+    }
+
+    function moveBall(label) {
+      if (!letters.includes(label)) return;
+
+      const letterElement = document.getElementById(label);
+      const ball = document.getElementById("ball");
+
+      if (letterElement) {
+        const containerRect = document.getElementById("letters").getBoundingClientRect();
+        const letterRect = letterElement.getBoundingClientRect();
+
+        const newLeft = letterRect.left - containerRect.left + (letterRect.width / 2) - 10;
+        ball.style.left = `${newLeft}px`;
+      }
+    }
+  </script>
+</body>
+</html>

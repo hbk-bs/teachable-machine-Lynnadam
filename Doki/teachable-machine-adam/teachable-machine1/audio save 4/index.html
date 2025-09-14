@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sprachgesteuertes Wortspiel</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Fredoka', sans-serif;
+      text-align: center;
+      background: linear-gradient(to bottom, #fffde7, #ffe0b2);
+      overflow: hidden;
+      color: #5d4037;
+    }
+
+    h1, h2 {
+      color: #bf360c;
+      margin: 30px 0;
+    }
+
+    #overlay, #win-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 204, 128, 0.95);
+      color: #4e342e;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      font-family: 'Fredoka', cursive, sans-serif;
+      padding: 20px;
+      z-index: 9999;
+      border-radius: 15px;
+    }
+
+    #win-overlay {
+      display: none;
+    }
+
+    #start-button, #next-button-overlay, #next-button {
+      padding: 15px 30px;
+      font-size: 22px;
+      border: none;
+      background-color: #ffca28;
+      color: #4e342e;
+      border-radius: 15px;
+      cursor: pointer;
+      box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    #start-button:hover, #next-button-overlay:hover, #next-button:hover {
+      background-color: #ffa000;
+      transform: scale(1.05);
+    }
+
+    .centered {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+
+    .letters-container {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 60px;
+      position: relative;
+      flex-wrap: wrap;
+    }
+
+    .letter-box {
+      width: 64px;
+      height: 64px;
+      border: 2px solid #ffb74d;
+      background-color: #fffde7;
+      border-radius: 12px;
+      font-size: 28px;
+      font-weight: bold;
+      color: #bf360c;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .ball {
+      height: 120px; 
+      position: absolute;
+      top: 80px;
+      left: 50%; 
+      transform: translateX(-50%);
+      transition: left 1s ease, top 1s ease, transform 1s ease;
+    }
+
+    .word-boxes {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 150px;
+    }
+
+    .word-slot {
+      width: 64px;
+      height: 64px;
+      border: 3px dashed #ffb74d;
+      background-color: #fff8e1;
+      border-radius: 12px;
+      font-size: 28px;
+      font-weight: bold;
+      color: #8d6e63;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #successMessage {
+      font-size: 24px;
+      color: #43a047;
+      margin-top: 30px;
+    }
+
+    .win-gif {
+      width: 280px;
+      height: auto;
+      margin: 20px 0;
+    }
+
+    .symbol-box {
+      width: 50%;
+      max-width: 600px;
+      height: 200px;
+      margin: 60px auto 0 auto;
+      background-color: #fffde7;
+      border-radius: 20px;
+      box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 10px;
+      font-size: 40px;
+      font-weight: bold;
+      color: #6d4c41;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="overlay">
+    <h2>Sprachgesteuertes Wortspiel</h2>
+    <button id="start-button" onclick="startGame()">Start</button>
+  </div>
+
+  <div id="win-overlay">
+    <h2>Super!</h2>
+    <img src="https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/gif.gif" alt="Feierndes Gif" class="win-gif" />
+    <button id="next-button-overlay" onclick="nextWordFromOverlay()">Neues Wort</button>
+  </div>
+
+  <h1>WAS SIEHST DU?</h1>
+
+  <div class="centered">
+    <button id="next-button" onclick="nextWord()" style="display:none; margin-left: 20px;">Neues Wort</button>
+  </div>
+
+  <div class="letters-container" id="letters">
+    <div class="letter-box" id="A">A</div>
+    <div class="letter-box" id="B">B</div>
+    <div class="letter-box" id="E">E</div>
+    <div class="letter-box" id="L">L</div>
+    <div class="letter-box" id="M">M</div>
+    <div class="letter-box" id="N">N</div>
+    <div class="letter-box" id="S">S</div>
+    <div class="letter-box" id="U">U</div>
+    <img id="ball" class="ball" src="https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/vorne.png" alt="Figur" />
+  </div>
+
+  <div class="word-boxes" id="wordSlots"></div>
+
+  <div class="symbol-box" id="symbolBox"></div>
+
+  <div id="successMessage"></div>
+
+  <div id="symbolBox" class="symbol-box"></div>
+
+<script>
+  const URL = "https://teachablemachine.withgoogle.com/models/QUD-R0XNd/";
+  const letters = ["A", "B", "E", "L", "M", "N", "S", "U"];
+  const wordList = ["BAUM", "BESEN", "MAUS", "BUS", "MANN", "BLUME", "BALL", "LESEN"];
+  let targetWord = "";
+  let currentIndex = 0;
+  let recognizer;
+  const ball = document.getElementById("ball");
+  let usedWords = [];
+  let isProcessing = false;
+
+  // Bild-URLs für spezielle Wörter
+  const imageWords = {
+    BLUME: "https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/blume.png",
+    BESEN: "https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/besen.png",
+    MAUS: "https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/Maus.png",
+    BALL: "https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/ball.png"
+  };
+
+  function pickRandomWord() {
+    let word;
+    do {
+      word = wordList[Math.floor(Math.random() * wordList.length)];
+    } while (usedWords.includes(word));
+    usedWords.push(word);
+    if (usedWords.length === wordList.length) usedWords = [];
+    return word;
+  }
+
+  function setupWord(word) {
+    targetWord = word;
+    currentIndex = 0;
+    isProcessing = false;
+    document.getElementById("wordSlots").innerHTML = "";
+    document.getElementById("successMessage").innerText = "";
+    document.getElementById("next-button").style.display = "none";
+    document.getElementById("win-overlay").style.display = "none";
+    ball.style.top = "80px";
+    ball.style.left = "50%";
+    ball.style.transform = "translateX(-50%)";
+    ball.src = "https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/vorne.png";
+
+    for (let i = 0; i < word.length; i++) {
+      const slot = document.createElement("div");
+      slot.className = "word-slot";
+      slot.id = "slot-" + i;
+      slot.setAttribute("data-letter", word[i]);
+      slot.innerHTML = `<span style="visibility: hidden;">${word[i]}</span>`;
+      document.getElementById("wordSlots").appendChild(slot);
+    }
+
+    // Wenn das Wort ein Bild hat, zeige es statt Text
+    const symbolBox = document.getElementById("symbolBox");
+    if (imageWords[word]) {
+      symbolBox.innerHTML = `<img src="${imageWords[word]}" alt="${word}" style="max-height: 180px;">`;
+    } else {
+      symbolBox.innerHTML = `<h2>${word}</h2>`;
+    }
+  }
+
+  async function createModel() {
+    recognizer = speechCommands.create(
+      "BROWSER_FFT",
+      undefined,
+      URL + "model.json",
+      URL + "metadata.json"
+    );
+    await recognizer.ensureModelLoaded();
+    return recognizer;
+  }
+
+    async function startGame() {
+      document.getElementById("overlay").style.display = "none";
+      setupWord(pickRandomWord());
+
+      recognizer = await createModel();
+      const classLabels = recognizer.wordLabels();
+
+      recognizer.listen(result => {
+        if (isProcessing) return;
+
+        const scores = result.scores;
+        const maxIndex = scores.indexOf(Math.max(...scores));
+        const detectedLabel = classLabels[maxIndex];
+
+        if (detectedLabel === targetWord[currentIndex]) {
+          isProcessing = true;
+
+          moveBallToLetter(detectedLabel).then(() => {
+            moveBallToSlot(currentIndex, detectedLabel);
+            currentIndex++;
+
+            if (currentIndex === targetWord.length) {
+              recognizer.stopListening();
+              showWinOverlay();
+            } else {
+              setTimeout(() => {
+                isProcessing = false;
+              }, 3000);
+            }
+          });
+        }
+      }, {
+        probabilityThreshold: 0.75,
+        overlapFactor: 0.5,
+        invokeCallbackOnNoiseAndUnknown: false
+      });
+    }
+
+    function showWinOverlay() {
+      document.getElementById("win-overlay").style.display = "flex";
+    }
+
+    function nextWordFromOverlay() {
+      recognizer.stopListening();
+      document.getElementById("win-overlay").style.display = "none";
+      setupWord(pickRandomWord());
+      startGame();
+    }
+
+    function nextWord() {
+      setupWord(pickRandomWord());
+    }
+
+    function moveBallToLetter(letter) {
+      return new Promise(resolve => {
+        const letterElement = document.getElementById(letter);
+        if (!letterElement) return;
+
+        const containerRect = document.getElementById("letters").getBoundingClientRect();
+        const letterRect = letterElement.getBoundingClientRect();
+
+        const newLeft = letterRect.left - containerRect.left + (letterRect.width / 2) - 32;
+        const currentLeft = ball.getBoundingClientRect().left;
+
+        if (newLeft > currentLeft) {
+          ball.src = "https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/rechts.gif";
+        } else if (newLeft < currentLeft) {
+          ball.src = "https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/links.gif";
+        }
+
+        ball.style.left = `${newLeft}px`;
+
+        setTimeout(() => {
+          ball.src = "https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/vorne.png";
+          resolve();
+        }, 1000);
+      });
+    }
+
+    function moveBallToSlot(index, letter) {
+      const slot = document.getElementById("slot-" + index);
+      if (!slot) return;
+
+      const wordContainerRect = document.getElementById("wordSlots").getBoundingClientRect();
+      const slotRect = slot.getBoundingClientRect();
+
+      const newLeft = slotRect.left - wordContainerRect.left + (slotRect.width / 2) - 32;
+      const newTop = slotRect.top - document.getElementById("letters").getBoundingClientRect().top + 10;
+
+      ball.style.top = `${newTop}px`;
+      ball.style.left = `${newLeft}px`;
+
+      setTimeout(() => {
+        slot.innerHTML = `<span style="visibility: visible;">${letter}</span>`;
+        ball.style.top = "80px";
+        ball.src = "https://hbk-bs.github.io/the-archives-Lynnadam/assets/images/vorne.png";
+      }, 1000);
+    }
+  </script>
+
+</body>
+</html>
