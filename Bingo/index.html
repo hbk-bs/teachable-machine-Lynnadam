@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bingolösung 1–90 — Animiertes Ziehungsrad</title>
+  <style>
+    :root{
+      --bg:#0f1724; --panel:#0b1220; --accent:#6ee7b7; --muted:#94a3b8; --card:#081226;
+      --glass: rgba(255,255,255,0.04);
+      --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{font-family:var(--font-sans);background:radial-gradient(1200px 600px at 10% 10%,#071124 0%,var(--bg) 30%), var(--bg); color:#e6eef6; margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:28px}
+
+    .app{width:1100px; max-width:96vw; display:grid; grid-template-columns: 420px 1fr; gap:24px}
+
+    .panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent); border-radius:14px; padding:18px; box-shadow: 0 6px 30px rgba(2,6,23,0.6);}
+
+    /* left big area */
+    .draw-area{display:flex; flex-direction:column; gap:14px; align-items:center; justify-content:center; padding:28px}
+
+    .wheel{width:300px; height:300px; border-radius:50%; background:conic-gradient(from 0deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); display:grid; place-items:center; position:relative; box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 10px 30px rgba(2,6,23,0.6);}
+    .wheel::after{content:''; position:absolute; width:8px; height:8px; background:var(--accent); top:12px; right:50%; transform:translateX(50%); border-radius:50%}
+
+    .number-card{width:160px; height:160px; border-radius:18px; background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); display:flex; align-items:center; justify-content:center; font-size:64px; font-weight:700; color:var(--accent); transform-origin:center; transition:transform 600ms cubic-bezier(.2,.9,.3,1); box-shadow: 0 6px 20px rgba(12,18,30,0.6)}
+
+    .number-card.animate{animation:pop 800ms cubic-bezier(.2,.9,.3,1)}
+    @keyframes pop{0%{transform:scale(.2) rotate(-60deg); opacity:0}50%{transform:scale(1.12) rotate(10deg); opacity:1}100%{transform:scale(1) rotate(0)}}
+
+    .controls{display:flex; gap:10px; margin-top:6px}
+    button{background:var(--accent); color:#012018; border:none; padding:10px 14px; border-radius:10px; font-weight:600; cursor:pointer; box-shadow: 0 6px 16px rgba(107,197,167,0.15)}
+    button.ghost{background:transparent; color:var(--accent); border:1px solid rgba(110,231,183,0.16)}
+    button.warn{background:#ffb4b4; color:#5a0707}
+    .mini{padding:8px 10px; font-size:14px}
+
+    /* right side grid */
+    .right{display:flex; flex-direction:column; gap:14px}
+    .stats{display:flex; gap:12px}
+    .stat{flex:1; background:var(--glass); padding:12px; border-radius:10px; text-align:center}
+    .stat .big{font-size:24px; font-weight:700}
+    .grid{background:var(--panel); padding:12px; border-radius:12px; display:grid; grid-template-columns: repeat(10,1fr); gap:8px; max-height:520px; overflow:auto}
+    .cell{height:46px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02)); color:var(--muted); font-weight:700}
+    .cell.drawn{background:linear-gradient(180deg,var(--accent), #3ad59e); color:#022; box-shadow: 0 4px 14px rgba(45,190,150,0.16); transform:translateY(-2px)}
+
+    .history{background:var(--panel); padding:10px; border-radius:10px; display:flex; gap:8px; flex-wrap:wrap}
+    .chip{padding:8px 10px; border-radius:10px; background:rgba(255,255,255,0.02); color:var(--muted); font-weight:700}
+    .chip.recent{background:linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); color:var(--accent)}
+
+    footer{font-size:12px; color:var(--muted); margin-top:8px; text-align:center}
+
+    /* responsive */
+    @media (max-width:900px){.app{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="panel draw-area">
+      <div class="wheel" aria-hidden="true">
+        <div id="display" class="number-card">--</div>
+      </div>
+
+      <div class="controls">
+        <button id="drawBtn" class="mini">Zahl ziehen</button>
+        <button id="autoBtn" class="mini ghost">Auto (laufen)</button>
+        <button id="resetBtn" class="mini ghost">Zurücksetzen</button>
+        <button id="shuffleBtn" class="mini ghost">Neu mischen</button>
+      </div>
+
+      <div id="hint" style="color:var(--muted); font-size:14px; margin-top:8px">Drücke <strong>Leertaste</strong> oder klicke "Zahl ziehen"</div>
+      <footer>Keine Doppelten — 1 bis 90. Entwickelt für schnelle und schöne Ziehungen.</footer>
+    </div>
+
+    <div class="panel right">
+      <div class="stats">
+        <div class="stat"><div class="big" id="remaining">90</div><div style="font-size:12px;color:var(--muted)">verbleibend</div></div>
+        <div class="stat"><div class="big" id="drawnCount">0</div><div style="font-size:12px;color:var(--muted)">gezogen</div></div>
+        <div class="stat"><div class="big" id="lastNum">—</div><div style="font-size:12px;color:var(--muted)">zuletzt</div></div>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center; justify-content:space-between;">
+        <strong style="color:var(--muted)">Gezogene Zahlen</strong>
+        <div style="color:var(--muted); font-size:13px">Sortiert: <label><input type="checkbox" id="sortedCB"> ja</label></div>
+      </div>
+
+      <div class="history" id="history" aria-live="polite"></div>
+
+      <div style="margin-top:6px; color:var(--muted); font-size:13px">Alle Zahlen</div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </div>
+
+  <script>
+    // Setup numbers 1..90
+    const TOTAL = 90;
+    let pool = [];
+    let drawn = [];
+    let autoTimer = null;
+
+    const display = document.getElementById('display');
+    const drawBtn = document.getElementById('drawBtn');
+    const autoBtn = document.getElementById('autoBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    const remainingEl = document.getElementById('remaining');
+    const drawnCountEl = document.getElementById('drawnCount');
+    const lastNumEl = document.getElementById('lastNum');
+    const historyEl = document.getElementById('history');
+    const gridEl = document.getElementById('grid');
+    const sortedCB = document.getElementById('sortedCB');
+
+    function initPool(){
+      pool = Array.from({length:TOTAL}, (_,i)=>i+1);
+      shuffleArray(pool);
+      drawn = [];
+      renderGrid();
+      updateStats();
+      display.textContent='--';
+      lastNumEl.textContent='—';
+      historyEl.innerHTML='';
+    }
+
+    function shuffleArray(a){
+      for(let i=a.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [a[i],a[j]]=[a[j],a[i]];
+      }
+    }
+
+    function drawOnce(){
+      if(pool.length===0){
+        alert('Alle Zahlen wurden gezogen. Bitte zurücksetzen.');
+        stopAuto();
+        return;
+      }
+      // pop next from pool (pool was shuffled)
+      const num = pool.pop();
+      drawn.push(num);
+      showNumber(num);
+      markGrid(num);
+      updateStats();
+    }
+
+    function showNumber(num){
+      // animation: quick rotate + pop
+      display.classList.remove('animate');
+      void display.offsetWidth; // reflow to restart animation
+      display.textContent = num;
+      display.classList.add('animate');
+      lastNumEl.textContent = num;
+
+      // history chip
+      const chip = document.createElement('div');
+      chip.className = 'chip recent';
+      chip.textContent = num;
+      historyEl.prepend(chip);
+      // keep only last 20 shown as recent style
+      Array.from(historyEl.children).forEach((c,idx)=>{
+        if(idx>19) c.classList.remove('recent');
+      });
+    }
+
+    function markGrid(num){
+      const cell = document.getElementById('cell-'+num);
+      if(cell) cell.classList.add('drawn');
+    }
+
+    function updateStats(){
+      remainingEl.textContent = pool.length;
+      drawnCountEl.textContent = drawn.length;
+      if(sortedCB.checked){
+        renderHistorySorted();
+      } else {
+        renderHistoryUnsorted();
+      }
+    }
+
+    function renderGrid(){
+      gridEl.innerHTML='';
+      for(let i=1;i<=TOTAL;i++){
+        const div = document.createElement('div');
+        div.className='cell';
+        div.id='cell-'+i;
+        div.textContent=i;
+        gridEl.appendChild(div);
+      }
+    }
+
+    function renderHistoryUnsorted(){
+      // keep chips in order of drawing (historyEl already has them prepended), so rebuild
+      historyEl.innerHTML='';
+      for(let i=drawn.length-1;i>=0;i--){
+        const chip = document.createElement('div');
+        chip.className='chip'+ (i>=drawn.length-20 ? ' recent':'');
+        chip.textContent=drawn[i];
+        historyEl.appendChild(chip);
+      }
+    }
+
+    function renderHistorySorted(){
+      historyEl.innerHTML='';
+      const sorted = [...drawn].sort((a,b)=>a-b);
+      sorted.forEach((n,idx)=>{
+        const chip = document.createElement('div');
+        chip.className='chip'+ (idx>=sorted.length-20 ? ' recent':'');
+        chip.textContent=n;
+        historyEl.appendChild(chip);
+      });
+    }
+
+    // Controls
+    drawBtn.addEventListener('click', ()=>{ drawOnce(); });
+
+    autoBtn.addEventListener('click', ()=>{
+      if(autoTimer) stopAuto(); else startAuto();
+    });
+
+    resetBtn.addEventListener('click', ()=>{
+      if(!confirm('Zurücksetzen? Alle gezogenen Zahlen werden gelöscht.')) return;
+      stopAuto();
+      initPool();
+    });
+
+    shuffleBtn.addEventListener('click', ()=>{
+      shuffleArray(pool);
+      alert('Pool neu gemischt.');
+    });
+
+    sortedCB.addEventListener('change', updateStats);
+
+    // Auto draw every 1.2s
+    function startAuto(){
+      if(pool.length===0) return;
+      autoBtn.textContent='Stoppe Auto';
+      autoBtn.classList.add('warn');
+      autoTimer = setInterval(()=>{
+        drawOnce();
+        if(pool.length===0) stopAuto();
+      }, 1200);
+    }
+    function stopAuto(){
+      if(autoTimer) clearInterval(autoTimer);
+      autoTimer = null;
+      autoBtn.textContent='Auto (laufen)';
+      autoBtn.classList.remove('warn');
+    }
+
+    // keyboard: space to draw
+    window.addEventListener('keydown', (e)=>{
+      if(e.code==='Space'){
+        e.preventDefault();
+        drawOnce();
+      }
+    });
+
+    // init
+    initPool();
+
+    // Accessibility: expose function to draw from console
+    window.bingo = {drawOnce, initPool, pool, drawn};
+  </script>
+</body>
+</html>
